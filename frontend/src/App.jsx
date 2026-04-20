@@ -1,23 +1,69 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from '../src/pages/Home'; // Ta galerie de vidéos
-import Watch from '../src/pages/Watch'; // Ton futur lecteur vidéo
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import de Bootstrap
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Pages de ton binôme (Auth)
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+
+// Tes pages (Streaming - Personne 3)
+import Home from './pages/Home'; 
+import Watch from './pages/Watch';
+
+// Styles
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="app-container">
-        {/* Tu peux ajouter une Navbar ici plus tard */}
-        
         <Routes>
-          {/* Route pour la Galerie (Accueil) */}
-          <Route path="/" element={<Home />} />
+          {/* --- Routes Publiques --- */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* --- Routes Protégées (Nécessitent d'être connecté) --- */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } 
+          />
           
-          {/* Route pour le Lecteur Vidéo (Détail) */}
-          {/* ":id" est un paramètre dynamique pour savoir quel film charger */}
-          <Route path="/watch/:id" element={<Watch />} />
+          <Route 
+            path="/watch/:id" 
+            element={
+              <ProtectedRoute>
+                <Watch />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* --- Route Admin (Bonus) --- */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Redirection automatique si la route n'existe pas */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </Router>
