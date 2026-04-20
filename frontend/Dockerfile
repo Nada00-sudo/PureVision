@@ -6,7 +6,11 @@ WORKDIR /app
 # copier package.json d'abord (optimisation cache)
 COPY package*.json ./
 
-RUN npm install
+# Important: Vite 8 dépend de "rolldown" qui utilise des optionalDependencies
+# pour récupérer un binding natif par plateforme. Dans certains contextes Docker,
+# `npm install` peut "oublier" ces optional deps; `npm ci --include=optional`
+# est plus déterministe.
+RUN npm ci --include=optional --no-audit --fund=false
 
 # copier le reste du projet
 COPY . .

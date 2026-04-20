@@ -22,3 +22,13 @@ CREATE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- Catalogue streaming (utilisé par /api/videos et seed.js)
+CREATE TABLE IF NOT EXISTS videos (
+    id SERIAL PRIMARY KEY,
+    titre VARCHAR(255) NOT NULL,
+    description TEXT,
+    url_video TEXT NOT NULL,
+    photo_couverture TEXT,
+    categorie VARCHAR(100)
+);

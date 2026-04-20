@@ -33,6 +33,15 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          <Route 
+            path="/catalog" 
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } 
+          />
           
           <Route 
             path="/watch/:id" 

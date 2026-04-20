@@ -1,71 +1,116 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
+import { apiUrl } from '../config/apiBase';
 
 const Watch = () => {
-  const { id } = useParams(); // Récupère l'ID de la vidéo depuis l'URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [video, setVideo] = useState(null);
+  const [loadError, setLoadError] = useState(null);
   const videoRef = useRef(null);
 
-  // 1. Charger les détails de la vidéo et l'ancien progrès
   useEffect(() => {
-    // Récupérer les infos de la vidéo (Titre + URL MinIO)
-    fetch(`http://localhost:5000/api/videos/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setVideo(data);
-        // Bonus : Ici on pourrait aussi charger le timestamp depuis l'historique
+    let cancelled = false;
+    setLoadError(null);
+    fetch(apiUrl(`/api/videos/${id}`))
+      .then((res) => {
+        if (res.status === 404) throw new Error('Vidéo introuvable');
+        if (!res.ok) throw new Error('Erreur lors du chargement');
+        return res.json();
       })
-      .catch(err => console.error("Erreur chargement vidéo:", err));
+      .then((data) => {
+        if (!cancelled) setVideo(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err.message || 'Erreur réseau');
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  // 2. Sauvegarder l'historique (quand l'utilisateur quitte ou met en pause)
   const saveProgress = () => {
     if (videoRef.current) {
       const currentTime = videoRef.current.currentTime;
-      fetch('http://localhost:5000/api/history', {
+      fetch(apiUrl('/api/history'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           video_id: id,
-          timestamp: currentTime
-        })
+          timestamp: currentTime,
+        }),
       });
     }
   };
 
-  if (!video) return <div className="text-white p-5">Chargement...</div>;
+  if (loadError) {
+    return (
+      <AppLayout>
+        <div className="watch-page-full">
+          <div className="catalog-status catalog-status-error p-4">{loadError}</div>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="btn btn-outline-light m-3"
+          >
+            ← Retour au catalogue
+          </button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!video) {
+    return (
+      <AppLayout>
+        <div className="watch-page-full">
+          <p className="text-white p-5">Chargement…</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
-    <div className="container-fluid bg-dark vh-100 p-0 d-flex flex-column">
-      {/* Barre de retour */}
-      <div className="p-3">
-        <button onClick={() => { saveProgress(); navigate('/'); }} className="btn btn-outline-light">
-          ← Retour à la galerie
-        </button>
-      </div>
+    <AppLayout>
+      <div className="watch-page-full">
+        <div className="watch-toolbar">
+          <button
+            type="button"
+            onClick={() => {
+              saveProgress();
+              navigate('/');
+            }}
+            className="btn btn-outline-light btn-sm"
+          >
+            ← Retour au catalogue
+          </button>
+        </div>
 
-      {/* Lecteur Vidéo */}
-      <div className="flex-grow-1 d-flex align-items-center justify-content-center">
-        <video
-          ref={videoRef}
-          controls
-          autoPlay
-          className="w-75 shadow-lg"
-          style={{ border: '2px solid var(--accent-purple)', borderRadius: '10px' }}
-          onPause={saveProgress}
-        >
-          {/* L'URL provient de ta base de données (ex: http://localhost:9000/...) */}
-          <source src={video.url_video} type="video/mp4" />
-          Votre navigateur ne supporte pas la lecture de vidéos.
-        </video>
-      </div>
+        <div className="watch-player-wrap">
+          <video
+            ref={videoRef}
+            controls
+            autoPlay
+            className="watch-video"
+            onPause={saveProgress}
+          >
+            <source src={video.url_video} type="video/mp4" />
+            Votre navigateur ne supporte pas la lecture de vidéos.
+          </video>
+        </div>
 
-      <div className="p-4 text-white text-center">
-        <h2 style={{ color: 'var(--accent-purple)' }}>{video.titre}</h2>
-        <p className="text-secondary">{video.categorie}</p>
+        <div className="watch-meta">
+          <h2 className="watch-meta-title">{video.titre}</h2>
+          {video.categorie && (
+            <p className="watch-meta-cat">{video.categorie}</p>
+          )}
+          {video.description && (
+            <p className="watch-meta-desc">{video.description}</p>
+          )}
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
