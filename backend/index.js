@@ -25,11 +25,11 @@ app.use(cors());
 app.use(express.json());
 
 // --- ROUTES  (Auth & Profil) ---
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // --- TES ROUTES (Vidéos & Streaming - Personne 3) ---
-app.get("/videos", async (req, res) => {
+app.get("/api/videos", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM videos");
     res.json(result.rows);
@@ -38,7 +38,7 @@ app.get("/videos", async (req, res) => {
   }
 });
 
-app.get("/videos/:id", async (req, res) => {
+app.get("/api/videos/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM videos WHERE id = $1", [id]);
