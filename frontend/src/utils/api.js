@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api', // L'URL de notre backend
+  baseURL: 'http://192.168.100.10:8080/api', // L'URL de notre backend
 });
 
 // Intercepteur pour ajouter le token JWT à chaque requête sortante
