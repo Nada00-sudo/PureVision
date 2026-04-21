@@ -42,7 +42,7 @@ const Home = () => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetch(apiUrl('/api/videos'))
+    fetch(apiUrl('/videos'))
       .then((res) => {
         if (!res.ok) throw new Error('Impossible de charger le catalogue');
         return res.json();

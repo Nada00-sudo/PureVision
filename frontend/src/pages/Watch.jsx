@@ -13,7 +13,7 @@ const Watch = () => {
   useEffect(() => {
     let cancelled = false;
     setLoadError(null);
-    fetch(apiUrl(`/api/videos/${id}`))
+    fetch(apiUrl(`/videos/${id}`))
       .then((res) => {
         if (res.status === 404) throw new Error('Vidéo introuvable');
         if (!res.ok) throw new Error('Erreur lors du chargement');
