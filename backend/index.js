@@ -27,7 +27,10 @@ app.use(express.json());
 // --- ROUTES  (Auth & Profil) ---
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-
+app.get("/api/test", (req, res) => {
+  console.log("TEST ROUTE CALLED");
+  res.send("OK BACKEND TEST");
+});
 // --- TES ROUTES (Vidéos & Streaming - Personne 3) ---
 app.get("/api/videos", async (req, res) => {
   try {
